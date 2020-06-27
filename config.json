@@ -1,0 +1,16 @@
+{
+    "host": {
+        "grpcaddress": "localhost:6667"
+    },
+    "datastorage" : {
+        "credentials": {
+            "filename": "/home/gbodurov/firewall.db"
+        },
+    	"type": "sqlite"
+    },
+    "firewall" : {
+        "credentials": {
+        },
+    	"type": "firewalld"
+    }
+}
