@@ -20,6 +20,8 @@ import (
 	"fmt"
 	"log"
 	"strings"
+
+	"github.com/netclave/common/utils"
 )
 
 type FirewallD struct {
@@ -62,7 +64,7 @@ func (fd *FirewallD) LoadCurrentPolicy() error {
 
 	command := "firewall-cmd --zone=public --list-all | grep rule"
 
-	output, err := runCommandGetOutput(command)
+	output, err := utils.RunCommandGetOutput(command)
 
 	//output, err := runPipeCommand("firewall-cmd", "--zone=public --list-all", "grep", "\"rule family\"")
 

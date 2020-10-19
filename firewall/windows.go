@@ -20,6 +20,8 @@ import (
 	"fmt"
 	"log"
 	"strings"
+
+	"github.com/netclave/common/utils"
 )
 
 type WindowsFirewall struct {
@@ -55,7 +57,7 @@ func (wf *WindowsFirewall) LoadCurrentPolicy() error {
 
 	command := "netsh advfirewall firewall show rule name=all | find \"Rule Name:\" | find \"NetClave\""
 
-	output, err := runCommandGetOutput(command)
+	output, err := utils.RunCommandGetOutput(command)
 
 	//output, err := runPipeCommand("firewall-cmd", "--zone=public --list-all", "grep", "\"rule family\"")
 

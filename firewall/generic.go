@@ -19,42 +19,10 @@ package firewall
 import (
 	"fmt"
 	"log"
-	"os/exec"
 	"strings"
+
+	"github.com/netclave/common/utils"
 )
-
-var BinSh = "bash"
-var C = "-c"
-
-//runCommandGetOutput runs command directly and returns the output as a string
-func runCommandGetOutput(command string) (string, error) {
-	fmt.Println(command)
-	cmd := exec.Command(BinSh, C, command)
-
-	/*var out bytes.Buffer
-	var stderr bytes.Buffer
-	cmd.Stdout = &out
-	cmd.Stderr = &stderr*/
-
-	/*err := cmd.Run()
-
-	if err != nil {
-		fmt.Println(fmt.Sprint(err) + ": " + stderr.String())
-		return "", err
-	}
-
-	return out.String(), nil
-	*/
-
-	output, err := cmd.CombinedOutput()
-
-	if err != nil {
-		//fmt.Println(fmt.Sprint(err) + ": " + stderr.String())
-		return "", err
-	}
-
-	return string(output), err
-}
 
 func AddForIP(ip, port string, state *map[string]map[string]bool) {
 	_, ok := (*state)[ip]
@@ -178,7 +146,7 @@ func FlushNewPolicy(currentState, newState *map[string]map[string]bool, addComma
 	fmt.Println("Executing remove commands")
 
 	for _, commandString := range removeCommandStrings {
-		output, err := runCommandGetOutput(commandString)
+		output, err := utils.RunCommandGetOutput(commandString)
 
 		if err != nil {
 			log.Println(err.Error())
@@ -192,7 +160,7 @@ func FlushNewPolicy(currentState, newState *map[string]map[string]bool, addComma
 
 	for _, commandString := range addCommandStrings {
 
-		output, err := runCommandGetOutput(commandString)
+		output, err := utils.RunCommandGetOutput(commandString)
 
 		if err != nil {
 			log.Println(err.Error())

@@ -19,6 +19,8 @@ package firewall
 import (
 	"log"
 	"strings"
+
+	"github.com/netclave/common/utils"
 )
 
 type UFW struct {
@@ -54,7 +56,7 @@ func (ufw *UFW) LoadCurrentPolicy() error {
 
 	command := "ufw status | grep ALLOW"
 
-	output, err := runCommandGetOutput(command)
+	output, err := utils.RunCommandGetOutput(command)
 
 	//output, err := runPipeCommand("firewall-cmd", "--zone=public --list-all", "grep", "\"rule family\"")
 

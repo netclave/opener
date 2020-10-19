@@ -37,7 +37,7 @@ var FirewallCredentials map[string]string
 var ListenGRPCAddress = "localhost:6667"
 
 func Init() error {
-	flag.String("configFile", "~/config.json", "Provide full path to your config json file")
+	flag.String("configFile", "/opt/config.json", "Provide full path to your config json file")
 
 	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
 	pflag.Parse()
