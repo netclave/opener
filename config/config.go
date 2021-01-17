@@ -23,6 +23,7 @@ import (
 	"os"
 
 	"github.com/netclave/opener/firewall"
+	"github.com/netclave/opener/router"
 
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
@@ -31,8 +32,16 @@ import (
 
 var DataStorageCredentials map[string]string
 var StorageType string
+var Fail2BanDataStorageCredentials map[string]string
+var Fail2BanStorageType string
+var Fail2BanTTL int64
 var FirewallType string
 var FirewallCredentials map[string]string
+
+var RouterEnabled bool
+var RouterType string
+var RouterRules = []router.RouterRule{}
+var RouterCredentials map[string]string
 
 var ListenGRPCAddress = "localhost:6667"
 
@@ -69,9 +78,21 @@ func Init() error {
 	})
 	viper.SetDefault("datastorage.type", storage.REDIS_STORAGE)
 
+	viper.SetDefault("fail2bandatastorage.credentials", map[string]string{
+		"host":     "localhost:6379",
+		"db":       "5",
+		"password": "",
+	})
+
+	viper.SetDefault("fail2bandatastorage.type", storage.REDIS_STORAGE)
+
+	viper.SetDefault("fail2banttl", int64(300000))
+
 	viper.SetDefault("firewall.credentials", map[string]string{})
 
 	viper.SetDefault("firewall.type", firewall.FIREWALLD_CONFIGURATION)
+
+	viper.SetDefault("router.enabled", false)
 
 	hostConfig := viper.Sub("host")
 
@@ -84,10 +105,44 @@ func Init() error {
 	DataStorageCredentials = datastorageConfig.GetStringMapString("credentials")
 	StorageType = datastorageConfig.GetString("type")
 
+	fail2banDatastorageConfig := viper.Sub("fail2bandatastorage")
+
+	Fail2BanDataStorageCredentials = fail2banDatastorageConfig.GetStringMapString("credentials")
+	Fail2BanStorageType = fail2banDatastorageConfig.GetString("type")
+
+	Fail2BanTTL = viper.GetInt64("fail2banttl")
+
 	firewallConfig := viper.Sub("firewall")
 
 	FirewallCredentials = firewallConfig.GetStringMapString("credentials")
 	FirewallType = firewallConfig.GetString("type")
 
-	return err
+	routerConfig := viper.GetStringMap("router")
+
+	RouterEnabled = routerConfig["enabled"].(bool)
+
+	if RouterEnabled == true {
+		RouterType = routerConfig["type"].(string)
+		log.Println(RouterEnabled)
+		log.Println(RouterType)
+
+		rules := viper.Get("router.rules").([]interface{})
+
+		for _, ruleInterface := range rules {
+			rule := ruleInterface.(map[string]interface{})
+			fromPort := rule["fromport"].(float64)
+			toPort := rule["toport"].(float64)
+			address := rule["ipaddress"].(string)
+
+			routerRule := router.RouterRule{
+				FromPort:  int(fromPort),
+				ToPort:    int(toPort),
+				IPAddress: address,
+			}
+
+			RouterRules = append(RouterRules, routerRule)
+		}
+	}
+
+	return nil
 }

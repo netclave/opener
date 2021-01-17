@@ -24,6 +24,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/netclave/common/utils"
+
 	api "github.com/netclave/apis/opener/api"
 	"github.com/netclave/opener/component"
 	"github.com/netclave/opener/config"
@@ -117,6 +119,43 @@ func startFirewallDaemon() error {
 	return nil
 }
 
+func startFail2BanDeamon() error {
+	for {
+		fail2banDataStorage := component.CreateFail2BanDataStorage()
+
+		err := utils.LogBannedIPs(fail2banDataStorage)
+
+		if err != nil {
+			log.Println(err.Error())
+			return err
+		}
+
+		time.Sleep(2 * time.Second)
+	}
+
+	return nil
+}
+
+func applyRouterRules() error {
+	if config.RouterEnabled == true {
+		router, err := component.CreateRouter()
+
+		if err != nil {
+			return err
+		}
+
+		for _, rule := range config.RouterRules {
+			err = router.ExecuteRule(rule)
+
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
 func main() {
 	err := component.LoadComponent()
 	if err != nil {
@@ -125,11 +164,23 @@ func main() {
 	}
 
 	go func() {
-		err := startFirewallDaemon()
+		err := applyRouterRules()
 
 		if err != nil {
 			log.Println(err.Error())
 		}
+	}()
+
+	go func() {
+		err := startFail2BanDeamon()
+
+		if err != nil {
+			log.Println(err.Error())
+		}
+	}()
+
+	go func() {
+
 	}()
 
 	log.Println("Starting grpc server")

@@ -19,6 +19,12 @@ package handlers
 import (
 	"net/http"
 
+	"github.com/netclave/common/networkutils"
+
+	"github.com/netclave/common/utils"
+
+	"github.com/netclave/opener/config"
+
 	"github.com/netclave/common/jsonutils"
 	"github.com/netclave/opener/component"
 )
@@ -34,10 +40,18 @@ func GetPublicKey(w http.ResponseWriter, r *http.Request) {
 	signedResponse, err := jsonutils.SignAndEncryptResponse("", openerID,
 		privateKeyPEM, publicKeyPEM, "", true)
 
+	fail2banDataStorage := component.CreateFail2BanDataStorage()
+
+	fail2BanData := &utils.Fail2BanData{
+		DataStorage:   fail2banDataStorage,
+		RemoteAddress: networkutils.GetRemoteAddress(r),
+		TTL:           config.Fail2BanTTL,
+	}
+
 	if err != nil {
-		jsonutils.EncodeResponse("400", "Can not sign response", err.Error(), w)
+		jsonutils.EncodeResponse("400", "Can not sign response", err.Error(), w, fail2BanData)
 		return
 	}
 
-	jsonutils.EncodeResponse("200", "OK", signedResponse, w)
+	jsonutils.EncodeResponse("200", "OK", signedResponse, w, fail2BanData)
 }

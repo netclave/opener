@@ -12,5 +12,16 @@
         "credentials": {
         },
     	"type": "firewalld"
+    },
+    "router" : {
+        "enabled": true,
+        "rules": [
+            {
+                "fromport": 22,
+                "toport": 2222,
+                "ipaddress": "192.168.100.194"
+            }
+        ],
+    	"type": "firewalld"
     }
 }

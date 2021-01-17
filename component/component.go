@@ -19,6 +19,8 @@ package component
 import (
 	"fmt"
 
+	"github.com/netclave/opener/router"
+
 	"github.com/netclave/opener/firewall"
 
 	"github.com/netclave/common/cryptoutils"
@@ -44,6 +46,18 @@ func LoadComponent() error {
 	}
 
 	err = InitDataStorage()
+
+	if err != nil {
+		return err
+	}
+
+	err = InitDataStorage()
+
+	if err != nil {
+		return err
+	}
+
+	err = InitFail2BanDataStorage()
 
 	if err != nil {
 		return err
@@ -163,6 +177,24 @@ func CreateDataStorage() *storage.GenericStorage {
 	return storage
 }
 
+func InitFail2BanDataStorage() error {
+	storage := &storage.GenericStorage{
+		Credentials: config.Fail2BanDataStorageCredentials,
+		StorageType: config.Fail2BanStorageType,
+	}
+
+	return storage.Init()
+}
+
+func CreateFail2BanDataStorage() *storage.GenericStorage {
+	storage := &storage.GenericStorage{
+		Credentials: config.Fail2BanDataStorageCredentials,
+		StorageType: config.Fail2BanStorageType,
+	}
+
+	return storage
+}
+
 func CreateCryptoStorage() *cryptoutils.CryptoStorage {
 	cryptoStorage := &cryptoutils.CryptoStorage{
 		Credentials: config.DataStorageCredentials,
@@ -174,4 +206,8 @@ func CreateCryptoStorage() *cryptoutils.CryptoStorage {
 
 func CreateFirewallConfiguration() (firewall.FirewallConfiguration, error) {
 	return firewall.CreateFirewall(config.FirewallCredentials, config.FirewallType)
+}
+
+func CreateRouter() (router.Router, error) {
+	return router.CreateRouter(config.RouterCredentials, config.RouterType)
 }
